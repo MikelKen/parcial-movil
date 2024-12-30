@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:parcial_movile/screens/appointment_page.dart';
+import 'package:parcial_movile/screens/history_page.dart';
 import 'package:parcial_movile/screens/home_page.dart';
+import 'package:parcial_movile/screens/profile_page.dart';
 
 class MainLayout extends StatefulWidget {
   const MainLayout({super.key});
@@ -24,9 +26,11 @@ class _MainLayoutState extends State<MainLayout> {
             currentPage = value;
           });
         }),
-        children: const <Widget>[
+        children:  <Widget>[
           HomePage(),
+          HistoryPage(),
           AppointmentPage(),
+          ProfilePage(),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -47,8 +51,16 @@ class _MainLayoutState extends State<MainLayout> {
               label: 'Home',
           ),
           BottomNavigationBarItem(
+            icon: FaIcon(FontAwesomeIcons.fileMedical),
+            label: 'History',
+          ),
+          BottomNavigationBarItem(
             icon: FaIcon(FontAwesomeIcons.solidCalendarCheck),
             label: 'Appointments',
+          ),
+          BottomNavigationBarItem(
+            icon: FaIcon(FontAwesomeIcons.solidUser),
+            label: 'Profile',
           ),
         ],
       ),

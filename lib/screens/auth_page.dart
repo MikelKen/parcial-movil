@@ -22,39 +22,44 @@ class _AuthPageState extends State<AuthPage> {
       body: Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: 15,
-            vertical: 15,
+            vertical: 1,
           ),
         child: SafeArea(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
+
               children: <Widget>[
-                Text(
-                  AppText.enText['welcome_text']!,
+              Center(
+                child: Text(
+                  'Bienvenido\nClinica SSVS',
+                  textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontSize: 36,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                Config.spaceSmall,
+                // Config.spaceSmall,
+              ),
+
                 Text(
                   isSignIn
-                  ? AppText.enText['signIn_text']!
-                  : AppText.enText['register_text']!,
+                  ? 'Inicia sesión en tu cuenta'!//AppText.enText['signIn_text']!
+                  : 'Puede registrarse fácilmente y conectarse con los médicos cercanos a usted'!,
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                Config.spaceSmall,
+                // Config.spaceSmall,
                 isSignIn ? LoginForm() : SignUpForm(),
-                Config.spaceSmall,
+                // Config.spaceSmall,
                 isSignIn
                 ? Center(
                   child: TextButton(
                       onPressed: (){},
                       child: Text(
-                        AppText.enText['forgot-password']!,
+                        'Olvidaste tu contraseña',//AppText.enText['forgot-password']!,
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -67,17 +72,17 @@ class _AuthPageState extends State<AuthPage> {
                 ),
 
                 const Spacer(),
-                Center(
-                  child: Text(
-                    AppText.enText['social-login']!,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.normal,
-                      color: Colors.grey.shade500,
-                    ),
-                  ),
-                ),
-                Config.spaceSmall,
+                // Center(
+                //   child: Text(
+                //     'O continuar con la cuenta social',//AppText.enText['social-login']!,
+                //     style: TextStyle(
+                //       fontSize: 16,
+                //       fontWeight: FontWeight.normal,
+                //       color: Colors.grey.shade500,
+                //     ),
+                //   ),
+                // ),
+                // Config.spaceSmall,
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: const <Widget>[
@@ -85,7 +90,7 @@ class _AuthPageState extends State<AuthPage> {
                     SocialButton(social: 'facebook'),
                   ],
                 ),
-                Config.spaceSmall,
+                // Config.spaceSmall,
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
@@ -118,9 +123,14 @@ class _AuthPageState extends State<AuthPage> {
                 ),
               ],
             ),
+
         ),
       ),
 
     );
   }
+
+
+
+
 }

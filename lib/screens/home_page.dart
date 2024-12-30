@@ -19,6 +19,7 @@ class _HomePageState extends State<HomePage> {
 
   Map<String,dynamic> user = {};
   Map<String,dynamic> appointments = {};
+  String? token;
 
   List<Map<String, dynamic>> medCat = [
     {
@@ -27,26 +28,29 @@ class _HomePageState extends State<HomePage> {
     },
     {
       "icon":FontAwesomeIcons.heartPulse,
-      "category": "Cardiology",
+      "category": "Cardiologia",
     },
     {
       "icon":FontAwesomeIcons.lungs,
-      "category": "Respirations",
+      "category": "Neumología",
     },
     {
       "icon":FontAwesomeIcons.hand,
-      "category": "Dermatology",
+      "category": "Dermatología",
     },
     {
       "icon":FontAwesomeIcons.personPregnant,
-      "category": "Gynecology",
+      "category": "Ginecología",
     },
     {
       "icon":FontAwesomeIcons.teeth,
-      "category": "Dental",
+      "category": "Dentista",
     },
   ];
-
+  Future<void> getToken() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    token = prefs.getString('token') ?? '';
+  }
   Future<void> getData() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token') ?? '';
@@ -73,7 +77,9 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
+    //super.initState();
     getData();
+    getToken();
     super.initState();
   }
 
@@ -107,18 +113,23 @@ class _HomePageState extends State<HomePage> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        SizedBox(
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.of(context).pushNamed('notification_page');
+                          },
+                        child: SizedBox(
                           child: CircleAvatar(
                             radius: 30,
                             backgroundImage:
                                 AssetImage('assets/profile.jpg'),
                           ),
                         ),
+                        ),
                       ],
                     ),
                     Config.spaceMedium,
                     const Text(
-                      'Categoria',
+                      'Especialidad',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -130,10 +141,18 @@ class _HomePageState extends State<HomePage> {
                       child: ListView(
                         scrollDirection: Axis.horizontal,
                         children: List<Widget>.generate(medCat.length, (index) {
-                          return Card(
-                            margin: const EdgeInsets.only(right: 20),
-                            color: Config.primaryColor,
-                            child: Padding(
+                          return GestureDetector(
+                            onTap:(){
+                              Navigator.of(context).pushNamed(
+                                  'specialdoc_page',
+                                  arguments:  medCat[index]['category']
+                              );
+                            },
+
+                            child: Card(
+                              margin: const EdgeInsets.only(right: 20),
+                              color: Config.primaryColor,
+                              child: Padding(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 15,
                                   vertical: 10,
@@ -149,6 +168,7 @@ class _HomePageState extends State<HomePage> {
                                       width: 20,
                                     ),
                                     Text(
+
                                       medCat[index]['category'],
                                       style: const TextStyle(
                                         fontSize: 16,
@@ -157,7 +177,8 @@ class _HomePageState extends State<HomePage> {
                                     ),
                                   ],
                                 ),
-                            ),
+                              ),
+                            )
                           );
                         }),
                       ),
@@ -175,7 +196,9 @@ class _HomePageState extends State<HomePage> {
                     ? AppointmentCard(
                         appointment: appointments,
                         color: Config.primaryColor,
+                        token: token ?? '',
                     )
+
                    : Container(
                       width: double.infinity,
                       decoration: BoxDecoration(

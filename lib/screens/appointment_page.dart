@@ -13,13 +13,19 @@ class AppointmentPage extends StatefulWidget {
   State<AppointmentPage> createState() => _AppointmentPageState();
 }
 
-enum FilterStatus {RESERVADO, complete, CANCELADO}
+enum FilterStatus {RESERVADO, COMPLETADO, CANCELADO}
 
 class _AppointmentPageState extends State<AppointmentPage> {
   FilterStatus status = FilterStatus.RESERVADO;
   Alignment _alignment = Alignment.centerLeft;
   List<dynamic> schedules = [];
+  int? _selectedFichaId;
+  String? token;
 
+  Future<void> getToken() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    token = prefs.getString('token') ?? '';
+  }
   Future<void> getAppointments() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token') ?? '';
@@ -27,6 +33,8 @@ class _AppointmentPageState extends State<AppointmentPage> {
     if (appointment != 'Error'){
       setState(() {
         schedules = json.decode(appointment);
+        print('------------------------------------------------');
+        print(schedules);
       });
     }
   }
@@ -34,6 +42,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
   @override
   void initState() {
     getAppointments();
+    getToken();
     super.initState();
   }
 
@@ -45,8 +54,8 @@ class _AppointmentPageState extends State<AppointmentPage> {
         case 'RESERVADO':
           schedule['status'] = FilterStatus.RESERVADO;//schedule['status'] = FilterStatus.RESERVADO;
           break;
-        case 'complete':
-          schedule['status'] = FilterStatus.complete;
+        case 'COMPLETADO':
+          schedule['status'] = FilterStatus.COMPLETADO;
           break;
         case 'CANCELADO':
           schedule['status'] = FilterStatus.CANCELADO;
@@ -90,8 +99,8 @@ class _AppointmentPageState extends State<AppointmentPage> {
                                     if(filterStatus == FilterStatus.RESERVADO) {
                                       status = FilterStatus.RESERVADO;
                                       _alignment = Alignment.centerLeft;
-                                    }else if(filterStatus == FilterStatus.complete) {
-                                      status = FilterStatus.complete;
+                                    }else if(filterStatus == FilterStatus.COMPLETADO) {
+                                      status = FilterStatus.COMPLETADO;
                                       _alignment = Alignment.center;
                                     }else if(filterStatus == FilterStatus.CANCELADO) {
                                       status = FilterStatus.CANCELADO;
@@ -202,7 +211,35 @@ class _AppointmentPageState extends State<AppointmentPage> {
                                 children: [
                                   Expanded(
                                     child: OutlinedButton(
-                                        onPressed: () {},
+                                        onPressed: () async {
+                                          _selectedFichaId = schedule['id'];
+                                         print(_selectedFichaId);
+                                          final int fichaId = int.parse(_selectedFichaId.toString());
+                                          final canceled = await DioProvider().canceledAppointment(fichaId,token!);
+                                          print('&&&&&&&&&&&&&&&&&&&&&&&&&7');
+                                          print(canceled);
+                                          await getAppointments();
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(
+                                              content: Row(
+                                                children: [
+                                                  Icon(Icons.error, color: Colors.redAccent),
+                                                  SizedBox(width: 10),
+                                                  Expanded(
+                                                    child: Text(
+                                                      canceled,
+                                                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              backgroundColor: Colors.black87,
+                                              behavior: SnackBarBehavior.floating,
+                                              margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                                              duration: Duration(seconds: 3),
+                                            ),
+                                          );
+                                        },
                                         child: const Text(
                                           'Cancelar',
                                           style: TextStyle(color: Config.primaryColor),

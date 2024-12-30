@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:parcial_movile/utils/config.dart';
+import 'package:parcial_movile/providers/dio_privider.dart';
 import 'dart:math';
 
 class AppointmentCard extends StatefulWidget {
@@ -7,15 +8,18 @@ class AppointmentCard extends StatefulWidget {
     super.key,
     required this.appointment,
     required this.color,
+    required this.token,
   });
 
   final Map<String, dynamic> appointment; //doctor
   final Color color;
+  final String token;
   @override
   State<AppointmentCard> createState() => _AppointmentCardState();
 }
 
 class _AppointmentCardState extends State<AppointmentCard> {
+  int? _selectedFichaId;
   @override
   Widget build(BuildContext context) {
     String doctorImage = _getDoctorImage();
@@ -67,6 +71,7 @@ class _AppointmentCardState extends State<AppointmentCard> {
                 children: [
                   Expanded(
                       child: ElevatedButton(
+
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red,
                         ),
@@ -74,7 +79,32 @@ class _AppointmentCardState extends State<AppointmentCard> {
                           'Cancelar',
                           style: TextStyle(color: Colors.white),
                         ),
-                        onPressed: () {},
+                        onPressed: () async {
+                          _selectedFichaId = widget.appointment['id'];
+                          print(_selectedFichaId);
+                          final int fichaId = int.parse(_selectedFichaId.toString());
+                          final canceled = await DioProvider().canceledAppointment(fichaId,widget.token!);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Row(
+                                children: [
+                                  Icon(Icons.error, color: Colors.redAccent),
+                                  SizedBox(width: 10),
+                                  Expanded(
+                                    child: Text(
+                                      canceled,
+                                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              backgroundColor: Colors.black87,
+                              behavior: SnackBarBehavior.floating,
+                              margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                              duration: Duration(seconds: 3),
+                            ),
+                          );
+                          },
                       ),
                   ),
                   const SizedBox(

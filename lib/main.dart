@@ -5,6 +5,10 @@ import 'package:parcial_movile/screens/auth_page.dart';
 import 'package:parcial_movile/screens/booking_page.dart';
 import 'package:parcial_movile/screens/doctor_details.dart';
 import 'package:parcial_movile/screens/success_booke.dart';
+import 'package:parcial_movile/screens/specialdoc_page.dart';
+import 'package:parcial_movile/screens/historial_detail.dart';
+import 'package:parcial_movile/screens/notifitation_page.dart';
+import 'package:parcial_movile/screens/notification_detail.dart';
 
 import 'package:parcial_movile/utils/config.dart';
 import 'package:provider/provider.dart';
@@ -55,6 +59,10 @@ class MyApp extends StatelessWidget {
           'doc_details': (context) => const DoctorDetails(),
           'booking_page': (context) => BookingPage(),
           'success_booking': (context) => const AppointmentBooked(),
+          'specialdoc_page': (context) =>  SpecialdocPage(),
+          'history_detail': (context) => const HistorialDetail(),
+          'notification_page': (context) => NotificationPage(),
+          'notification_detail': (context) => const NotificationDetail(),
         },
 
       ),

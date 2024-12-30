@@ -67,7 +67,10 @@ class _LoginFormState extends State<LoginForm> {
                           color: Config.primaryColor,
                       ))),
            ),
-           Config.spaceSmall,
+           // Config.spaceSmall,
+            SizedBox(
+              height: 5,
+            ),
            //login button
            Consumer<AuthModel>(
              builder: (context, auth, child) {
@@ -77,6 +80,7 @@ class _LoginFormState extends State<LoginForm> {
                    onPressed: () async {
                      final token = await DioProvider().getToken(
                          _codeController.text, _passController.text);
+
                      if (token.length >= 0) {
                        auth.loginSuccess();
                        MyApp.navigatorKey.currentState!.pushNamed('main');

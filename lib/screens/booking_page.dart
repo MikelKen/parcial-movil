@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:parcial_movile/components/button.dart';
@@ -8,6 +9,7 @@ import 'package:parcial_movile/providers/dio_privider.dart';
 import 'package:parcial_movile/utils/config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'dart:convert';
 
 
 class BookingPage extends StatefulWidget {
@@ -26,15 +28,33 @@ class _BookingPageState extends State<BookingPage> {
   bool _isWeekend = false;
   bool _dateSelected = false;
   bool _timeSelected = false;
+  int? _selectedFichaId;
   String? token;
+
+  Map<String,dynamic> hoursDoctor = {};
 
   Future<void> getToken() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     token = prefs.getString('token') ?? '';
   }
+  Future <void> getHoursDoctor() async{
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token') ?? '';
+    final doctor = ModalRoute.of(context)!.settings.arguments as Map;
+    print(doctor);
+    final hourDoctor = await DioProvider().getHoursDoctor(doctor['doctor_id'], token);
+    if (hourDoctor != 'Error'){
+      setState(() {
+        hoursDoctor = json.decode(hourDoctor);
+        print(hoursDoctor);
+
+      });
+    }
+  }
 
   @override
   void initState() {
+    getHoursDoctor();
     getToken();
     super.initState();
   }
@@ -45,7 +65,7 @@ class _BookingPageState extends State<BookingPage> {
     final doctor = ModalRoute.of(context)!.settings.arguments as Map;
     return Scaffold(
       appBar: CustomAppbar(
-        appTitle: 'Appointment',
+        appTitle: 'Programar Cita',
         icon: const FaIcon(Icons.arrow_back_ios),
       ),
       body: CustomScrollView(
@@ -86,14 +106,17 @@ class _BookingPageState extends State<BookingPage> {
                   ),
                 ),
           )
-          : SliverGrid(
+          : hoursDoctor['fichas'] != null && hoursDoctor['fichas'].isNotEmpty
+         ? SliverGrid(
               delegate:SliverChildBuilderDelegate((context, index) {
+                final ficha = hoursDoctor['fichas'][index];
                 return InkWell(
                   splashColor: Colors.transparent,
                   onTap: () {
                     setState(() {
                       _currentIndex = index;
                       _timeSelected = true;
+                      _selectedFichaId = ficha['id'];
                     });
                   },
                   child: Container(
@@ -111,7 +134,16 @@ class _BookingPageState extends State<BookingPage> {
                     ),
                     alignment: Alignment.center,
                     child: Text(
-                      '${index + 9}:00 ${index + 9 > 11 ? "PM" : "AM"}',
+                     // '${ficha['startTime']}',//'${index + 9}:00 ${index + 9 > 11 ? "PM" : "AM"}',
+                          () {
+                        if (ficha['turn'] == 'mañana') {
+                          return '${index + 8}:00 ${index + 8 > 11 ? "PM" : "AM"}';
+                        } else if (ficha['turn'] == 'tarde') {
+                          return '${index + 13}:00 ${index + 12 > 11 ? "PM" : "AM"}';
+                        } else {
+                          return 'Turno no especificado';
+                        }
+                      }(),
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: _currentIndex == index ? Colors.white : null,
@@ -120,11 +152,23 @@ class _BookingPageState extends State<BookingPage> {
                   ),
                 );
               },
-              childCount: 8,
+              childCount: hoursDoctor['fichas'].length,//8,
               ) ,
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 4, childAspectRatio: 1.5
               ),
+          )
+          : SliverToBoxAdapter(
+            child: Center(
+              child: Text(
+                'No hay horarios disponibles',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey,
+                ),
+              ),
+            ),
           ),
           SliverToBoxAdapter(
             child: Container(
@@ -136,14 +180,35 @@ class _BookingPageState extends State<BookingPage> {
                     final getDate = DateConvert.getDate(_currentDay);
                     final getDay = DateConvert.getDay(_currentDay.weekday);
                     final getTime = DateConvert.getTime(_currentIndex ?? 0);
-                    print('----------------------------------');
-                    print(doctor);
-                    final booking = await DioProvider().bookAppointment(
-                        getDate, getDay, getTime, doctor['doctor_id'], token!);
-
+                    final int fichaId = int.parse(_selectedFichaId.toString());
+                    final booking = await DioProvider().reserverAppointment(
+                        fichaId, token!);
+                    print('----------------');
+                    print(booking);
                     if(booking == 200){
                     MyApp.navigatorKey.currentState!.pushNamed('success_booking');
-
+                    }else if(booking is String){
+                      print('llelgoo');
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Row(
+                            children: [
+                              Icon(Icons.error, color: Colors.redAccent),
+                              SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  booking,
+                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ],
+                          ),
+                          backgroundColor: Colors.black87,
+                          behavior: SnackBarBehavior.floating,
+                          margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                          duration: Duration(seconds: 3),
+                        ),
+                      );
                     }
                   },
                   disable: _timeSelected && _dateSelected ? false : true,
@@ -211,6 +276,5 @@ class _BookingPageState extends State<BookingPage> {
     );
   }
 }
-
 
 

@@ -19,7 +19,7 @@ class _DoctorDetailsState extends State<DoctorDetails> {
   final doctor = ModalRoute.of(context)!.settings.arguments as Map;
     return Scaffold(
       appBar: CustomAppbar(
-        appTitle: 'Doctor Details',
+        appTitle: 'Detalles del Medico',
         icon: const FaIcon(Icons.arrow_back_ios),
         actions: [
           IconButton(
